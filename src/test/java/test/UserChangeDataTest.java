@@ -16,7 +16,7 @@ import test.model.*;
 import test.service.*;
 public class UserChangeDataTest {
     private UserService userService = new UserService();
-    private String accessToken ;
+    private String accessToken ,accessToken2;
     private User user = new User("modenovaelenadiplom" + System.currentTimeMillis() +"@gmail.com",
             "Elena"+ System.currentTimeMillis(), "kristi"+ System.currentTimeMillis());;
     @Before
@@ -81,8 +81,8 @@ public class UserChangeDataTest {
 
         User user2 = new User("Denis" + System.currentTimeMillis() +"@gmail.com",
                 "Denis"+ System.currentTimeMillis(), "kristi"+ System.currentTimeMillis());;
-         this.userService.createUser(user2);
-
+        Response createResponse = this.userService.createUser(user2);
+        this.accessToken2 = createResponse.then().extract().jsonPath().getString("accessToken2");
         Response updateResponse = this.userService.updateUser(
                 new User(
                         user2.getEmail(),
@@ -113,5 +113,15 @@ public class UserChangeDataTest {
                 "message", equalTo("You should be authorised"));
         ;
     }
+    @After
+    public void clear () {
+        if (accessToken != null) {
+            this.userService.deleteUser(accessToken);
+        }
+        if (accessToken2 != null) {
+            this.userService.deleteUser(accessToken2);
+        }
+    }
+
 
 }

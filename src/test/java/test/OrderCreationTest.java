@@ -23,18 +23,19 @@ public class OrderCreationTest {
     private User user = new User("modenovaelenadiplom" + System.currentTimeMillis() +"@gmail.com",
             "Elena"+ System.currentTimeMillis(), "kristi"+ System.currentTimeMillis());;
     private UserService userService = new UserService();
+    private String accessToken;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = Urls.BASE_URI;
-
+        accessToken =null;
     }
 
     @Test
     @DisplayName("Order Creation with authorization")
     public void orderCreationWithAuth() {
         Response createResponse = this.userService.createUser(this.user);
-        String accessToken= createResponse.then().extract().jsonPath().getString("accessToken");
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
 
         Order order = new Order (new String[]{FILE_ING, FLEURBULKA_ING});
 
@@ -66,8 +67,7 @@ public class OrderCreationTest {
     @DisplayName("Order Creation with several ingredients")
     public void orderCreationWithIng() {
         Response createResponse = this.userService.createUser(this.user);
-        String accessToken= createResponse.then().extract().jsonPath().getString("accessToken");
-
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
         Order order = new Order (new String[]{FILE_ING, FLEURBULKA_ING,MYASO_ING});
 
         Response createResponse2 = this.orderService.createOrder(order,accessToken);
@@ -82,8 +82,7 @@ public class OrderCreationTest {
     @DisplayName("Order Creation without ingredients")
     public void orderCreationWithoutIng() {
         Response createResponse = this.userService.createUser(this.user);
-        String accessToken= createResponse.then().extract().jsonPath().getString("accessToken");
-
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
         Order order = new Order (new String[]{});
 
         Response createResponse2 = this.orderService.createOrder(order,accessToken);
@@ -97,7 +96,7 @@ public class OrderCreationTest {
     @DisplayName("Order Creation with invalid ingredient")
     public void orderCreationInvalidIng() {
         Response createResponse = this.userService.createUser(this.user);
-        String accessToken= createResponse.then().extract().jsonPath().getString("accessToken");
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
 
         Order order = new Order (new String[]{"6de"});
 
@@ -107,6 +106,13 @@ public class OrderCreationTest {
         //createResponse2.then().assertThat().body("success", equalTo(false),
        //         "message", equalTo("Internal Server Error"));
 
+    }
+
+    @After
+    public void clear () {
+        if (accessToken != null) {
+            this.userService.deleteUser(accessToken);
+        }
     }
 }
 

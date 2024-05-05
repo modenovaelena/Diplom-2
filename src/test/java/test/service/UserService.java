@@ -2,6 +2,7 @@ package test.service;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
+import test.model.Order;
 import test.model.User;
 import static test.Urls.*;
 import static io.restassured.RestAssured.given;
@@ -49,6 +50,15 @@ public class UserService {
                     .patch(UPDATE_USER_URL);
         }
 
+    }
+
+    @Step("Delete user via DELETE api/auth/user")
+    public Response deleteUser(String token) {
+        return given()
+                .header("Content-type", "application/json")
+                .header("Authorization", token)
+                .when()
+                .delete(DELETE_ORDER_URL);
     }
 
 }

@@ -13,4 +13,6 @@ public class Urls {
 
     public static final String GET_ORDER_URL = "/api/orders";
 
+    public static final String DELETE_ORDER_URL = "api/auth/user";
+
 }

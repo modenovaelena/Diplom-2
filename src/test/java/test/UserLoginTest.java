@@ -23,11 +23,12 @@ public class UserLoginTest {
 
     private User user = new User("modenovaelenadiplom" + System.currentTimeMillis() +"@gmail.com",
             "Elena"+ System.currentTimeMillis(), "kristi"+ System.currentTimeMillis());;
-
+    private String accessToken;
     @Before
     public void setUp() {
         RestAssured.baseURI = Urls.BASE_URI;
-        this.userService.createUser(this.user);
+        Response createResponse = this.userService.createUser(this.user);
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
     }
 
     @Test
@@ -71,4 +72,11 @@ public class UserLoginTest {
                 "message",equalTo("email or password are incorrect"));
     }
 
+    @After
+    public void clear () {
+        if (accessToken != null) {
+            this.userService.deleteUser(accessToken);
+        }
+
+    }
 }

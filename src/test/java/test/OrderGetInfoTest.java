@@ -18,6 +18,8 @@ import static test.Ingredients.*;
 import test.model.*;
 import test.service.*;
 
+import java.util.List;
+
 public class OrderGetInfoTest {
 
     private OrderService orderService = new OrderService();
@@ -25,29 +27,30 @@ public class OrderGetInfoTest {
             "Elena" + System.currentTimeMillis(), "kristi" + System.currentTimeMillis());
     ;
     private UserService userService = new UserService();
+    private String accessToken;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = Urls.BASE_URI;
-
+        accessToken = null;
     }
 
     @Test
     @DisplayName("Order get information with authorization")
     public void orderGetWithAuth() {
         Response createResponse = this.userService.createUser(this.user);
-        String accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
 
         Order order = new Order(new String[]{FILE_ING, FLEURBULKA_ING});
         Response createResponse2 = this.orderService.createOrder(order, accessToken);
 
-        Response createResponse3 = this.orderService.getOrders(accessToken);
+        Response getOrdersResponse = this.orderService.getOrders(accessToken);
 
-        createResponse3.then().assertThat().statusCode(200);
-        createResponse3.then().assertThat().body("success", equalTo(true));
-       createResponse3.then().assertThat().body("orders.ingredients", is(notNullValue()));
-
-
+        getOrdersResponse.then().assertThat().statusCode(200);
+        getOrdersResponse.then().assertThat().body("success", equalTo(true));
+        getOrdersResponse.then().assertThat().body("orders.ingredients", is(notNullValue()));
+        List<Order> orders = getOrdersResponse.jsonPath().getList("orders", Order.class);
+        assertTrue(orders.size() ==1);
     }
     @Test
     @DisplayName("Get order info without authorization")
@@ -62,6 +65,11 @@ public class OrderGetInfoTest {
                 "message", equalTo("You should be authorised"));
 
     }
-
+    @After
+    public void clear () {
+        if (accessToken != null) {
+            this.userService.deleteUser(accessToken);
+        }
+    }
 }
 

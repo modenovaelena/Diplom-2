@@ -11,13 +11,24 @@ import static org.hamcrest.Matchers.equalTo;
 
 import test.model.*;
 import test.service.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserCreationTest {
     private User user;
     private UserService userService = new UserService();
+
+
+    private String accessToken;
+
     @Before
     public void setUp() {
         RestAssured.baseURI = Urls.BASE_URI;
+        accessToken = null;
+
     }
+
 
     @Test
     @DisplayName("Check if it is possible to create user")
@@ -26,6 +37,7 @@ public class UserCreationTest {
                 "Elena"+ System.currentTimeMillis(), "kristi"+ System.currentTimeMillis());
 
         Response createResponse = this.userService.createUser(this.user);
+        this.accessToken = createResponse.then().extract().jsonPath().getString("accessToken");
         createResponse.then().assertThat().statusCode(200);
         createResponse.then().assertThat().body("success",equalTo(true));
 
@@ -41,6 +53,7 @@ public class UserCreationTest {
 
         // create first user
         Response createResponse1 = this.userService.createUser(this.user);
+        this.accessToken = createResponse1.then().extract().jsonPath().getString("accessToken");
         createResponse1.then().assertThat().statusCode(200);
 
         // attempt to create second user with the same data
@@ -88,4 +101,12 @@ public class UserCreationTest {
                 "message", equalTo("Email, password and name are required fields"));
     }
 
+    @After
+    public void clear () {
+      if (accessToken != null) {
+        this.userService.deleteUser(accessToken);
+      }
+
     }
+
+}
