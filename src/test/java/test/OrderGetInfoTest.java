@@ -13,9 +13,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertTrue;
 import static test.Ingredients.*;
 import test.model.*;
 import test.service.*;
+
 public class OrderGetInfoTest {
 
     private OrderService orderService = new OrderService();
@@ -39,12 +41,11 @@ public class OrderGetInfoTest {
         Order order = new Order(new String[]{FILE_ING, FLEURBULKA_ING});
         Response createResponse2 = this.orderService.createOrder(order, accessToken);
 
-        Response createResponse3 = this.userService.createUser(this.user);
+        Response createResponse3 = this.orderService.getOrders(accessToken);
 
-        createResponse2.then().assertThat().statusCode(200);
-        createResponse2.then().assertThat().body("success", equalTo(true));
-
-        createResponse2.then().assertThat().body("order.ingredients", is(notNullValue()));
+        createResponse3.then().assertThat().statusCode(200);
+        createResponse3.then().assertThat().body("success", equalTo(true));
+       createResponse3.then().assertThat().body("orders.ingredients", is(notNullValue()));
 
 
     }
@@ -54,11 +55,13 @@ public class OrderGetInfoTest {
 
         Order order = new Order (new String[]{FILE_ING, FLEURBULKA_ING});
 
-        Response createResponse = this.orderService.createOrder(order,null);
+        Response createResponse = this.orderService.getOrders(null);
 
-        createResponse.then().assertThat().statusCode(200);
-        createResponse.then().assertThat().body("success", equalTo(true));
-        createResponse.then().assertThat().body("order.ingredients", nullValue());
+        createResponse.then().assertThat().statusCode(401);
+        createResponse.then().assertThat().body("success", equalTo(false),
+                "message", equalTo("You should be authorised"));
+
     }
 
 }
+
