@@ -33,7 +33,7 @@ public class OrderService {
     }
 
     @Step("Get orders via GET /api/orders")
-    public Response getOrders(token) {
+    public Response getOrders(String token) {
         if (token != null) {
             return given()
                     .header("Content-type", "application/json")
